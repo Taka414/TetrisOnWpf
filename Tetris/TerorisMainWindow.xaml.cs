@@ -22,17 +22,25 @@ namespace WpfApplication1
     /// </summary>
     public partial class TerorisMainWindow : Window
     {
+        //
+        // --- Fields ----
+        //
+
         /// <summary>ゲームのフレームレートを指定します。</summary>
         private static readonly TimeSpan frame_rate = new TimeSpan(0, 0, 0, 0, 33);
 
         /// <summary>キャンバスに描画するタイマー値</summary>
-        DispatcherTimer timer = new DispatcherTimer()
-        {
-            Interval = TerorisMainWindow.frame_rate,
-        };
+        DispatcherTimer timer = new DispatcherTimer() { Interval = TerorisMainWindow.frame_rate };
 
         /// <summary>テトリスの画面</summary>
         private Bord bord;
+
+        /// <summary>フレームをカウントします</summary>
+        private int skip_frames;
+
+        //
+        // ---- Constructors ----
+        //
 
         /// <summary>
         /// 既定の初期値で <see cref="TerorisMainWindow"/> の新しいインスタンスを作成します。
@@ -45,37 +53,14 @@ namespace WpfApplication1
             timer.Tick += timer_Tick;
         }
 
-        private int wait_timer;
-
-        /// <summary>
-        /// DispatcherTimer - Tickイベント : 1フレームの処理を記述します。
-        /// </summary>
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            this.timer.IsEnabled = false;
-
-            this.bord.ShowBord(this.game_view);
-
-            if (this.wait_timer % 5 == 0)
-            {
-                if (!this.bord.DownCurrentBlock())
-                {
-                    this.bord.GameOver();
-                    this.bord.ShowBord(this.game_view);
-                    return;
-                }
-                this.wait_timer = 0;
-            }
-
-            this.wait_timer++;
-
-            this.timer.IsEnabled = true;
-        }
+        //
+        // ---- EventHandlers ----
+        //
 
         /// <summary>
         /// MainWindow Class - Loadedイベント : ウインドウプロシージャの登録
         /// </summary>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void window_Loaded(object sender, RoutedEventArgs e)
         {
             timer.IsEnabled = true;
 
@@ -85,9 +70,9 @@ namespace WpfApplication1
         }
 
         /// <summary>
-        /// ゲーム画面 - KeyDwonイベント
+        /// MainWindow > Canvas - KeyDwonイベント
         /// </summary>
-        private void Canvas_KeyDown(object sender, KeyEventArgs e)
+        private void canvas_KeyDown(object sender, KeyEventArgs e)
         {
             BlockStatus s = this.bord.CurrentBlobkStatus.Clone();
             switch (e.Key)
@@ -127,6 +112,31 @@ namespace WpfApplication1
                     this.bord.PutBlock(this.bord.CurrentBlobkStatus);
                 }
             }
+        }
+
+        /// <summary>
+        /// DispatcherTimer - Tickイベント : 1フレームの処理を記述します。
+        /// </summary>
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            this.timer.IsEnabled = false;
+
+            this.bord.ShowBord(this.game_view);
+
+            if (this.skip_frames % 5 == 0)
+            {
+                if (!this.bord.DownCurrentBlock())
+                {
+                    this.bord.GameOver();
+                    this.bord.ShowBord(this.game_view);
+                    return;
+                }
+                this.skip_frames = 0;
+            }
+
+            this.skip_frames++;
+
+            this.timer.IsEnabled = true;
         }
     }
 
