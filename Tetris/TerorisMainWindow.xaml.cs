@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace WpfApplication1
+namespace Tetris
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック

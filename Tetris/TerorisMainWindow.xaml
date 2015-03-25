@@ -1,4 +1,4 @@
-﻿<Window x:Class="WpfApplication1.TerorisMainWindow"
+﻿<Window x:Class="Tetris.TerorisMainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Tertis"  Loaded="window_Loaded" Width="328" Height="576" MinWidth="272" MinHeight="545" KeyDown="canvas_KeyDown" KeyUp="Window_KeyUp">
