@@ -189,7 +189,7 @@ namespace WpfApplication1
     public class BlockImgHelper
     {
         /// <summary>ブロックの画像が配置されている場所</summary>
-        private Uri block_img_uri = new Uri("./Resources/block.bmp", UriKind.Relative);
+        private Uri block_img_uri = new Uri("./Resources/block2.bmp", UriKind.Relative);
 
         /// <summary>クラスで管理するイメージテーブル</summary>
         private IDictionary<BlockColors, CroppedBitmap> block_img_table = new Dictionary<BlockColors, CroppedBitmap>();
