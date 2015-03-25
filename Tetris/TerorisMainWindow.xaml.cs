@@ -27,7 +27,7 @@ namespace WpfApplication1
         //
 
         /// <summary>ゲームのフレームレートを指定します。</summary>
-        private static readonly TimeSpan frame_rate = new TimeSpan(0, 0, 0, 0, 33);
+        private static readonly TimeSpan frame_rate = new TimeSpan(0, 0, 0, 0, 40);
 
         /// <summary>キャンバスに描画するタイマー値</summary>
         DispatcherTimer timer = new DispatcherTimer() { Interval = TerorisMainWindow.frame_rate };
@@ -37,6 +37,12 @@ namespace WpfApplication1
 
         /// <summary>フレームをカウントします</summary>
         private int skip_frames;
+
+        /// <summary>Key_Downイベント(左右下)のイベント発生時のガクつきを抑えるためのクラス</summary>
+        private PeriodicSignals keySignal = new PeriodicSignals(TerorisMainWindow.frame_rate);
+
+        /// <summary>Key_Downイベント(上)のイベント発生時のガクつきを抑えるためのクラス</summary>
+        private PeriodicSignals keySignalUp = new PeriodicSignals(new TimeSpan(0, 0, 0, 0, TerorisMainWindow.frame_rate.Milliseconds * 5));
 
         //
         // ---- Constructors ----
@@ -50,7 +56,9 @@ namespace WpfApplication1
             this.InitializeComponent();
             this.bord = new Bord();
             this.bord.InitBord();
-            timer.Tick += timer_Tick;
+            this.timer.Tick += timer_Tick;
+            this.keySignal.Ticks += this.continuousKeyboardEvents;
+            this.keySignalUp.Ticks += this.continuousKeyboardEvents;
         }
 
         //
@@ -70,47 +78,32 @@ namespace WpfApplication1
         }
 
         /// <summary>
-        /// MainWindow > Canvas - KeyDwonイベント
+        /// MainWindow - KeyDwonイベント : ボタンが押された事をオブジェクトに通知します。
         /// </summary>
         private void canvas_KeyDown(object sender, KeyEventArgs e)
         {
-            BlockStatus s = this.bord.CurrentBlobkStatus.Clone();
-            switch (e.Key)
+            if (e.Key == Key.Up)
             {
-                case Key.Left:
-                    s.X--;
-                    break;
-
-                case Key.Right:
-                    s.X++;
-                    break;
-
-                case Key.Up:
-                    s.Rotate++;
-                    break;
-
-                case Key.Down:
-                    s.Y++;
-                    this.bord.SkipDown = true;
-                    break;
-
-                default:
-                    break;
+                this.keySignalUp.Start(e.Key);
             }
-
-            if (s.X != this.bord.CurrentBlobkStatus.X ||
-                s.Y != this.bord.CurrentBlobkStatus.Y ||
-                s.Rotate != this.bord.CurrentBlobkStatus.Rotate)
+            else
             {
-                this.bord.DeleteBlock(this.bord.CurrentBlobkStatus);
-                if (this.bord.PutBlock(s))
-                {
-                    this.bord.CurrentBlobkStatus = s;
-                }
-                else
-                {
-                    this.bord.PutBlock(this.bord.CurrentBlobkStatus);
-                }
+                this.keySignal.Start(e.Key);
+            }
+        }
+
+        /// <summary>
+        /// MainWindow - KeyUpイベント : ボタンが押されたことをオブジェクトに通知します。
+        /// </summary>
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up)
+            {
+                this.keySignalUp.Stop();
+            }
+            else
+            {
+                this.keySignal.Stop();
             }
         }
 
@@ -137,6 +130,56 @@ namespace WpfApplication1
             this.skip_frames++;
 
             this.timer.IsEnabled = true;
+        }
+
+        //
+        // ---- Private Methods ----
+        //
+
+        /// <summary>
+        /// キーボードが押された時の処理
+        /// </summary>
+        private void continuousKeyboardEvents(Key key)
+        {
+            BlockStatus s = this.bord.CurrentBlobkStatus.Clone();
+            switch (key)
+            {
+                case Key.Left:
+                    s.X--;
+                    break;
+
+                case Key.Right:
+                    s.X++;
+                    break;
+
+                case Key.Up:
+                    s.Rotate++;
+                    break;
+
+                case Key.Down:
+                    s.Y++;
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (s.X != this.bord.CurrentBlobkStatus.X ||
+                s.Y != this.bord.CurrentBlobkStatus.Y ||
+                s.Rotate != this.bord.CurrentBlobkStatus.Rotate)
+            {
+                this.bord.DeleteBlock(this.bord.CurrentBlobkStatus);
+                if (this.bord.PutBlock(s))
+                {
+                    this.bord.CurrentBlobkStatus = s;
+                }
+                else
+                {
+                    this.bord.PutBlock(this.bord.CurrentBlobkStatus);
+                    this.keySignal.Stop();
+                    this.keySignalUp.Stop();
+                }
+            }
         }
     }
 
@@ -311,11 +354,6 @@ namespace WpfApplication1
         public BlockStatus CurrentBlobkStatus { get; set; }
 
         /// <summary>
-        /// 次のDown処理を飛ばすように指示します。
-        /// </summary>
-        public bool SkipDown { get; set; }
-
-        /// <summary>
         /// 既定の初期値を用いて <see cref="Bord"/> クラスの新しいインスタンスを作成します。
         /// </summary>
         public Bord()
@@ -435,14 +473,7 @@ namespace WpfApplication1
             this.DeleteBlock(this.CurrentBlobkStatus);
             BlockStatus s = this.CurrentBlobkStatus.Clone();
 
-            if (this.SkipDown)
-            {
-                this.SkipDown = false;
-            }
-            else
-            {
-                s.Y++;
-            }
+            s.Y++;
 
             if (this.PutBlock(s))
             {
@@ -477,8 +508,7 @@ namespace WpfApplication1
             return new BlockStatus()
             {
                 X = 5,
-                Y = 4,
-                //Type = 1,
+                Y = 3,
                 Type = (this.r.Next() % 7) +1,
                 Rotate = this.r.Next(0, 4),
             };
@@ -667,6 +697,71 @@ namespace WpfApplication1
             BlockDefine.Block[7].Position[1].Y = 0;
             BlockDefine.Block[7].Position[2].X = -1;
             BlockDefine.Block[7].Position[2].Y = 0;
+        }
+    }
+
+    /// <summary>
+    /// (キーボードイベントの発生が不連続のため)
+    /// キーが押されっぱなしの状態を通知するためのクラス
+    /// </summary>
+    public class PeriodicSignals
+    {
+        /// <summary>キーが押され続けたときに発生する押しっぱなしイベントの発生周期</summary>
+        DispatcherTimer timer;
+
+        /// <summary>現在押下中のキー</summary>
+        private Key key;
+
+        /// <summary>
+        /// 定期的に発生するキーイベントを設定または取得します
+        /// </summary>
+        public event Action<Key> Ticks;
+
+        /// <summary>
+        /// イベント発生間隔を指定してオブジェクトを初期化します。
+        /// </summary>
+        public PeriodicSignals(TimeSpan s)
+        {
+            this.timer = new DispatcherTimer()
+            {
+                Interval = s
+            };
+            this.timer.Tick += Tick;
+        }
+
+        /// <summary>
+        /// 押されっぱなしの状態を開始します。
+        /// </summary>
+        public void Start(Key key)
+        {
+            if (this.key == key)
+            {
+                return; // 既にキーシグナル発行中
+            }
+            this.key = key;
+            timer.Start();
+            this.Ticks(key); // 最初の1回は即時呼び出し
+        }
+
+        /// <summary>
+        /// キーが離された事をこのオブジェクトをへ通知します。
+        /// </summary>
+        public void Stop()
+        {
+            timer.Stop();
+            this.key = Key.None;
+        }
+
+        /// <summary>
+        /// Ticks イベントを発行します。
+        /// </summary>
+        public void Tick(object sender, EventArgs e)
+        {
+            if (this.Ticks == null)
+            {
+                return;
+            }
+            this.Ticks(this.key);
         }
     }
 }
