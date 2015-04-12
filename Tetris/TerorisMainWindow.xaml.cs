@@ -27,7 +27,7 @@ namespace Tetris
         //
 
         /// <summary>ゲームのフレームレートを指定します。</summary>
-        private static readonly TimeSpan frame_rate = new TimeSpan(0, 0, 0, 0, 40);
+        private static readonly TimeSpan frame_rate = new TimeSpan(0, 0, 0, 0, 50);
 
         /// <summary>キャンバスに描画するタイマー値</summary>
         DispatcherTimer timer = new DispatcherTimer() { Interval = TerorisMainWindow.frame_rate };

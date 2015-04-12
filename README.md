@@ -1,2 +1,2 @@
-# TetrisOnWpf
-This product is a Tetris in c # and WPF.
+# c# と WPF でテトリスを作ってみた
+この production は、学習用にテトリスを c# と WPF を使ってテトリスを作成したものです。
