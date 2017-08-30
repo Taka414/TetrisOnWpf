@@ -1,2 +1,6 @@
-# c# ‚Æ WPF ‚ÅƒeƒgƒŠƒX‚ðì‚Á‚Ä‚Ý‚½
-‚±‚Ì production ‚ÍAŠwK—p‚ÉƒeƒgƒŠƒX‚ð c# ‚Æ WPF ‚ðŽg‚Á‚ÄƒeƒgƒŠƒX‚ðì¬‚µ‚½‚à‚Ì‚Å‚·B
+# ãƒ†ãƒˆãƒªã‚¹ã‚’C#ã¨WPFã§ä½œã£ã¦ã¿ãŸ
+
+C#ã¨WPFã®ã¿ã§ãƒ†ãƒˆãƒªã‚¹ã‚’ä½œæˆã—ã¦ã¿ã¾ã—ãŸã€‚
+
+http://takachan.hatenablog.com/entry/2015/03/25/233341
+
