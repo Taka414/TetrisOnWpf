@@ -2,5 +2,5 @@
 
 C#とWPFのみでテトリスを作成してみました。
 
-http://takachan.hatenablog.com/entry/2015/03/25/233341
+https://takap-tech.com/entry/2015/03/25/233341
 
